@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Segurança Social Direta</title>
+  <link rel="stylesheet" href="/custom.css" />
+</head>
+<body>
+
+  <!-- HEADER PRINCIPAL (Visível em todas as telas logadas) -->
+  <header class="ss-header" id="mainHeader">
+    <div class="ss-container">
+      <div class="ss-topbar">
+        <!-- Logo da Empresa / Segurança Social Direta -->
+        <a class="ss-brand" onclick="navigateTo('home')" title="Página inicial">
+          <img id="headerLogoImg" src="/assets/ssd.svg" alt="Segurança Social Direta" />
+          <div id="headerCustomBrandText" class="ss-brand-custom-text" style="display: none;">
+            <span class="ss-brand-title" id="headerPortalTitle">SEGURANÇA SOCIAL</span>
+            <span class="ss-brand-subtitle" id="headerPortalSubtitle">DIRETA</span>
+          </div>
+        </a>
+
+        <!-- Barra de Pesquisa Central -->
+        <div class="ss-search-wrap">
+          <form class="ss-search-box" onsubmit="handleGlobalSearch(event)">
+            <input
+              type="search"
+              id="globalSearchInput"
+              placeholder="Em que podemos ajudar?"
+              autocomplete="off"
+              oninput="renderWorkersTable()"
+            />
+            <button type="submit" class="ss-search-btn" title="Pesquisar">
+              <svg width="18" height="18" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="116" cy="116" r="84"></circle>
+                <line x1="175.4" y1="175.4" x2="224" y2="224"></line>
+              </svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- Ícones Direita (Mensagens, Agenda, Avatar TL) -->
+        <div class="ss-user-actions">
+          <button class="ss-icon-btn" title="Mensagens e Notificações" onclick="navigateTo('workers', 'comunicacoes')">
+            <svg width="21" height="21" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="32" y="56" width="192" height="144" rx="8"></rect>
+              <polyline points="224 56 128 144 32 56"></polyline>
+            </svg>
+            <span class="ss-badge-dot"></span>
+          </button>
+
+          <button class="ss-icon-btn" title="Agenda e Obrigações" onclick="openModal('modalImport')">
+            <svg width="21" height="21" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="40" y="40" width="176" height="176" rx="8"></rect>
+              <line x1="176" y1="24" x2="176" y2="56"></line>
+              <line x1="80" y1="24" x2="80" y2="56"></line>
+              <line x1="40" y1="88" x2="216" y2="88"></line>
+              <circle cx="128" cy="136" r="10" fill="currentColor"></circle>
+              <circle cx="168" cy="136" r="10" fill="currentColor"></circle>
+              <circle cx="88" cy="172" r="10" fill="currentColor"></circle>
+              <circle cx="128" cy="172" r="10" fill="currentColor"></circle>
+            </svg>
+          </button>
+
+          <div class="ss-avatar-wrapper">
+            <button class="ss-avatar" id="headerAvatarBtn" onclick="toggleUserDropdown(event)" title="Perfil e Gestão da Empresa">
+              TL
+            </button>
+
+            <!-- Menu Dropdown do Avatar -->
+            <div class="ss-user-dropdown" id="userDropdown">
+              <div class="ss-user-dropdown-header">
+                <strong id="dropdownCompanyName">TRIÂNGULO MATIZADO, UNIPESSOAL - LDA</strong>
+                <span>NISS: <b id="dropdownCompanyNiss">25188187990</b></span>
+              </div>
+              <button class="ss-user-dropdown-item" onclick="closeUserDropdown(); openCompanyModal()">
+                <span>🏢</span> Personalizar Empresa & Logo
+              </button>
+              <button class="ss-user-dropdown-item" onclick="closeUserDropdown(); openSwitchCompanyModal()">
+                <span>🔄</span> Trocar / Nova Empresa
+              </button>
+              <button class="ss-user-dropdown-item" onclick="closeUserDropdown(); navigateTo('workers')">
+                <span>👥</span> Consultar Trabalhadores
+              </button>
+              <button class="ss-user-dropdown-item" onclick="closeUserDropdown(); openModal('modalImport')">
+                <span>📤</span> Subir Tabela de Trabalhadores
+              </button>
+              <button class="ss-user-dropdown-item" onclick="closeUserDropdown(); openWorkerModal()">
+                <span>➕</span> Comunicar Novo Vínculo
+              </button>
+              <button class="ss-user-dropdown-item danger" onclick="closeUserDropdown(); navigateTo('login')">
+                <span>🚪</span> Terminar sessão
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BARRA DE NAVEGAÇÃO PRINCIPAL -->
+      <nav class="ss-navbar" aria-label="Menu principal">
+        <ul class="ss-nav-group">
+          <li><button class="ss-nav-btn" onclick="closeMegaMenu(); navigateTo('home')">Família</button></li>
+          <li><button class="ss-nav-btn" onclick="closeMegaMenu(); navigateTo('home')">Doença</button></li>
+          <li><button class="ss-nav-btn" onclick="closeMegaMenu(); navigateTo('home')">Ação Social</button></li>
+          <li>
+            <button class="ss-nav-btn" id="navBtnTrabalho" onclick="toggleMegaMenuTrabalho(event)">
+              Trabalho
+            </button>
+          </li>
+        </ul>
+
+        <ul class="ss-nav-group">
+          <li><button class="ss-nav-btn" onclick="closeMegaMenu(); navigateTo('home')">Pagamentos e dívidas</button></li>
+          <li><button class="ss-nav-btn" onclick="closeMegaMenu(); navigateTo('home')">Simuladores</button></li>
+          <li><button class="ss-nav-btn" onclick="closeMegaMenu(); navigateTo('home')">Ajuda</button></li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- MEGA-MENU "TRABALHO" (Idêntico à Imagem 2) -->
+    <div class="ss-megamenu-overlay" id="megaMenuTrabalho">
+      <div class="ss-container">
+        <div class="ss-megamenu-grid">
+          <!-- Coluna 1 -->
+          <div class="ss-mega-col">
+            <a class="ss-mega-item" onclick="closeMegaMenu(); navigateTo('workers')">
+              <h4>Cuidados na Doença</h4>
+              <p>Subsídio de Doença, subsídios para assistência à família e outros apoios na doença.</p>
+            </a>
+            <a class="ss-mega-item" onclick="closeMegaMenu(); navigateTo('workers')">
+              <h4>Entrada, Saída e Destacamento de Trabalhadores</h4>
+              <p>Admissão, destacamento e mobilidade de trabalhadores, cessação de contratos, Incentivos à Contratação e outros serviços.</p>
+            </a>
+            <a class="ss-mega-item" onclick="closeMegaMenu(); navigateTo('workers')">
+              <h4>Reforma e Invalidez</h4>
+              <p>Pensões de velhice, de Invalidez, prova de vida e outros complementos.</p>
+            </a>
+            <a class="ss-mega-item" onclick="closeMegaMenu(); navigateTo('workers')">
+              <h4>Fundos e Programas</h4>
+              <p>Fundo de Garantia Salarial, Incentivos à Contratação, Layoff e outras medidas e fundos de apoio.</p>
+            </a>
+          </div>
+
+          <!-- Coluna 2 -->
+          <div class="ss-mega-col">
+            <a class="ss-mega-item" onclick="closeMegaMenu(); navigateTo('workers')">
+              <h4>Remunerações e Contribuições</h4>
+              <p>Carreira contributiva, contribuições de entidades empregadoras e trabalhadores independentes, Layoff, declarações e outros apoios.</p>
+            </a>
+            <a class="ss-mega-item" onclick="closeMegaMenu(); navigateTo('workers')">
+              <h4>Desemprego</h4>
+              <p>Subsídios de desemprego e outras medidas de apoio.</p>
+            </a>
+            <a class="ss-mega-item" onclick="closeMegaMenu(); navigateTo('workers')">
+              <h4>Relações de Trabalho</h4>
+              <p>Direitos e deveres de trabalhadores e entidades empregadoras.</p>
+            </a>
+            <a class="ss-mega-item" onclick="closeMegaMenu(); navigateTo('workers')">
+              <h4>Serviço de Verificação de Incapacidades</h4>
+              <p>Verificação da incapacidade para trabalhar, Bolsa de Médicos e profissionais deste serviço.</p>
+            </a>
+          </div>
+
+          <!-- Coluna 3: Acesso rápido -->
+          <div class="ss-mega-quickbox">
+            <h3>Acesso rápido</h3>
+            <a class="ss-mega-quicklink" onclick="closeMegaMenu(); openWorkerModal()">
+              <span>Comunicar contrato e vínculo do trabalhador</span>
+              <span>→</span>
+            </a>
+            <a class="ss-mega-quicklink" onclick="closeMegaMenu(); navigateTo('workers')">
+              <span>Consultar, cessar e alterar vínculos dos trabalhadores</span>
+              <span>→</span>
+            </a>
+            <a class="ss-mega-quicklink" onclick="closeMegaMenu(); navigateTo('workers', 'comunicacoes')">
+              <span>Consultar painel das obrigações contributivas</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="ss-mega-footer-btns">
+          <button class="ss-btn-dark-pill" onclick="closeMegaMenu(); navigateTo('workers')">Aceder a Trabalho</button>
+          <button class="ss-btn-outline-pill" onclick="closeMegaMenu()">e-Clic</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =================================================================== -->
+  <!-- VIEW 1: HOME LOGADA (/ptss/pssd/home) - Idêntica à Imagem 3         -->
+  <!-- =================================================================== -->
+  <main id="viewHome" style="display: block;">
+    <div class="ss-container">
+      <!-- Banner Amarelo de Boas-vindas -->
+      <section class="ss-hero-banner">
+        <!-- Decoração orgânica amarela à direita -->
+        <svg class="ss-hero-shape" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+          <path d="M261.088 4.43964C333.427 7.66551 403.77 42.1547 450.424 104.751C532.939 215.463 510.098 372.175 399.407 454.777C288.716 537.38 132.091 514.592 49.576 403.879C3.61048 342.207 -9.66205 266.26 6.73229 196.801C64.7527 204.196 123.976 190.801 172.712 154.433C222.26 117.458 252.154 63.3148 261.088 4.43964Z" fill="#ffeaa0" />
+        </svg>
+
+        <div class="ss-hero-content">
+          <p class="ss-hero-greeting">Olá,</p>
+          <h2 class="ss-hero-company" id="heroCompanyName">TRIÂNGULO MATIZADO, UNIPESSOAL - LDA</h2>
+          <p class="ss-hero-niss">NISS: <strong id="heroCompanyNiss">25188187990</strong></p>
+
+          <div class="ss-hero-pills">
+            <button class="ss-hero-pill" onclick="openCompanyModal()">
+              <span>Perfil</span> <span>→</span>
+            </button>
+            <button class="ss-hero-pill" onclick="navigateTo('workers')">
+              <span>Declarações</span> <span>→</span>
+            </button>
+            <button class="ss-hero-pill" onclick="openSwitchCompanyModal()">
+              <span>Gestão de acessos</span> <span>→</span>
+            </button>
+            <button class="ss-hero-pill" onclick="navigateTo('workers')">
+              <span>Os meus favoritos</span> <span>→</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 Cards Principais sobrepostos ao Banner -->
+      <div class="ss-home-cards-grid">
+        <!-- Card 1 -->
+        <div class="ss-white-card" onclick="navigateTo('workers')">
+          <img src="/assets/child.svg" alt="" class="ss-white-card-icon" />
+          <h3>Vou ter ou tenho um filho</h3>
+          <p>Apoios durante a gravidez, depois do parto e para o crescimento dos seus filhos.</p>
+          <div class="ss-white-card-arrow">→</div>
+        </div>
+
+        <!-- Card 2: Sou empregador -->
+        <div class="ss-white-card" onclick="navigateTo('workers')">
+          <img src="/assets/suitcase.svg" alt="" class="ss-white-card-icon" />
+          <h3>Sou empregador</h3>
+          <p>Para gerir os seus trabalhadores e contribuições.</p>
+          <div class="ss-white-card-arrow">→</div>
+        </div>
+
+        <!-- Card 3: Outros momentos de vida -->
+        <div class="ss-white-card" onclick="navigateTo('workers')">
+          <!-- Ícone Árvore idêntico ao original -->
+          <svg class="ss-white-card-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 48H46" stroke="#181A1C" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M32 48V28" stroke="#181A1C" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M32 38L26 32" stroke="#181A1C" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M32 34L38 28" stroke="#181A1C" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M23 38C17.5 38 14 33.8 14 28.8C14 24.5 17 20.8 21.2 19.8C22.5 14.2 27.2 10 33 10C39.6 10 45 15.2 45.2 21.8C48.5 23.2 50.5 26.5 50.5 30.2C50.5 35.2 46.5 38 41.5 38" stroke="#181A1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="14" cy="44" r="3" fill="#16884e"/>
+          </svg>
+          <h3>Outros momentos de vida</h3>
+          <p>Descubra que outros momentos de vida podem ser úteis para a sua situação.</p>
+          <div class="ss-white-card-arrow">→</div>
+        </div>
+
+        <!-- Card 4: Acesso rápido (Verde Escuro) -->
+        <div class="ss-green-card">
+          <h3>Acesso rápido</h3>
+          <div class="ss-green-card-list">
+            <a class="ss-green-card-link" onclick="navigateTo('workers')">
+              <span>Consultar e obter declarações</span>
+              <span>→</span>
+            </a>
+            <a class="ss-green-card-link" onclick="navigateTo('workers')">
+              <span>Fazer pagamentos</span>
+              <span>→</span>
+            </a>
+            <a class="ss-green-card-link" onclick="openCompanyModal()">
+              <span>Consultar e alterar conta bancária</span>
+              <span>→</span>
+            </a>
+            <a class="ss-green-card-link" onclick="openCompanyModal()">
+              <span>Consultar e alterar contactos</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =================================================================== -->
+  <!-- VIEW 2: CONSULTAR TRABALHADORES (/ptss/qlf/tco/consulta/detalhe-trabalhador) -->
+  <!-- Idêntica à Imagem 1                                                 -->
+  <!-- =================================================================== -->
+  <main id="viewWorkers" style="display: none;">
+    <div class="ss-page-wrapper">
+      <!-- Breadcrumb -->
+      <div class="ss-breadcrumb">
+        <a onclick="navigateTo('home')">
+          <svg width="15" height="15" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M152 208V160a8 8 0 0 0-8-8H112a8 8 0 0 0-8 8v48a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8V115.5a8.3 8.3 0 0 1 2.6-5.9l80-72.7a8 8 0 0 1 10.8 0l80 72.7a8.3 8.3 0 0 1 2.6 5.9V208a8 8 0 0 1-8 8H160A8 8 0 0 1 152 208Z"></path>
+          </svg>
+          Início
+        </a>
+        <span>›</span>
+        <span class="current">Consultar, cessar e alterar ví...</span>
+      </div>
+
+      <!-- Título -->
+      <h1 class="ss-page-title">Consultar trabalhadores</h1>
+
+      <!-- Alerta Azul Informativo -->
+      <div class="ss-info-alert">
+        <div class="ss-info-alert-icon">i</div>
+        <div class="ss-info-alert-text">
+          Consulte os vínculos de trabalhadores, comunicações de vínculos a processar e comunicações de vínculos não aceites.<br />
+          Pode também transferir a informação apresentada.
+        </div>
+      </div>
+
+      <!-- Abas Vínculos / Comunicações -->
+      <div class="ss-tabs">
+        <button class="ss-tab-btn active" id="tabBtnVinculos" onclick="switchWorkersTab('vinculos')">
+          Vínculos
+        </button>
+        <button class="ss-tab-btn" id="tabBtnComunicacoes" onclick="switchWorkersTab('comunicacoes')">
+          Comunicações
+        </button>
+      </div>
+
+      <!-- Conteúdo Aba: VÍNCULOS -->
+      <div id="tabContentVinculos">
+        <div class="ss-table-toolbar">
+          <div class="ss-toolbar-actions-right">
+            <button class="ss-obter-vinculos-btn" onclick="exportWorkersXlsx()">
+              <span>Obter vínculos</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabela de Trabalhadores -->
+        <table class="ss-table">
+          <thead>
+            <tr>
+              <th class="sortable" style="width: 22%;" onclick="toggleWorkerSort('niss')">
+                <span style="display:inline-flex;align-items:center;gap:6px;">
+                  NISS
+                  <svg width="10" height="14" viewBox="0 0 10 14" fill="none" stroke="#555" stroke-width="1.5">
+                    <path d="M2 5L5 2L8 5" />
+                    <path d="M2 9L5 12L8 9" />
+                  </svg>
+                </span>
+              </th>
+              <th class="sortable" style="width: 43%;" onclick="toggleWorkerSort('nome')">
+                Nome do trabalhador <span id="sortIconNome" style="font-size: 11px; color: #666;"></span>
+              </th>
+              <th class="sortable" style="width: 18%;" onclick="toggleWorkerSort('data_nascimento')">
+                Data de nascimento <span id="sortIconData" style="font-size: 11px; color: #666;"></span>
+              </th>
+              <th class="center" style="width: 17%;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="workersTableBody">
+            <!-- Preenchido via JS -->
+          </tbody>
+        </table>
+
+        <div class="ss-pagination">
+          <span id="workersCountLabel">A apresentar 4 vínculos</span>
+        </div>
+      </div>
+
+      <!-- Conteúdo Aba: COMUNICAÇÕES -->
+      <div id="tabContentComunicacoes" style="display: none;">
+        <table class="ss-table">
+          <thead>
+            <tr>
+              <th>NISS</th>
+              <th>Nome do trabalhador</th>
+              <th>Tipo</th>
+              <th>Data de efeito</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="comunicacoesTableBody">
+            <!-- Preenchido via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- =================================================================== -->
+  <!-- VIEW 3: DETALHE DO VÍNCULO ("Consultar vínculo")                     -->
+  <!-- =================================================================== -->
+  <main id="viewWorkerDetail" style="display: none;">
+    <div class="ss-page-wrapper">
+      <div class="ss-breadcrumb">
+        <a onclick="navigateTo('home')">⌂ Início</a>
+        <span>›</span>
+        <a onclick="navigateTo('workers')">Consultar trabalhadores</a>
+        <span>›</span>
+        <span class="current">Detalhe do vínculo do trabalhador</span>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+        <h1 class="ss-page-title" style="margin: 0;">Detalhe do vínculo</h1>
+        <div style="display: flex; gap: 10px;">
+          <button class="ss-btn-outline-pill" onclick="navigateTo('workers')">← Voltar à lista</button>
+          <button class="ss-admin-action-btn" onclick="editCurrentWorker()">✏️ Alterar vínculo</button>
+          <button class="ss-btn-dark-pill" onclick="window.print()">🖨️ Imprimir comprovativo</button>
+        </div>
+      </div>
+
+      <div class="ss-info-alert">
+        <div class="ss-info-alert-icon">i</div>
+        <div class="ss-info-alert-text">
+          Consulte abaixo os dados detalhados do trabalhador e do respetivo contrato/vínculo comunicado à Segurança Social.
+        </div>
+      </div>
+
+      <!-- Card 1: Identificação do Trabalhador -->
+      <div class="ss-detail-card">
+        <div class="ss-detail-card-header">
+          <h3>Identificação do trabalhador</h3>
+          <span id="detailSituacaoBadge" class="ss-status-badge ativo">Ativo</span>
+        </div>
+        <div class="ss-detail-grid">
+          <div class="ss-detail-field">
+            <label>NISS</label>
+            <div id="detNiss">-</div>
+          </div>
+          <div class="ss-detail-field" style="grid-column: span 2;">
+            <label>Nome completo do trabalhador</label>
+            <div id="detNome">-</div>
+          </div>
+          <div class="ss-detail-field">
+            <label>Data de nascimento</label>
+            <div id="detDataNasc">-</div>
+          </div>
+          <div class="ss-detail-field">
+            <label>NIF</label>
+            <div id="detNif">-</div>
+          </div>
+          <div class="ss-detail-field">
+            <label>Nacionalidade</label>
+            <div id="detNacionalidade">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Dados da Entidade Empregadora e do Vínculo -->
+      <div class="ss-detail-card">
+        <div class="ss-detail-card-header">
+          <h3>Dados do contrato e enquadramento</h3>
+        </div>
+        <div class="ss-detail-grid">
+          <div class="ss-detail-field" style="grid-column: span 2;">
+            <label>Entidade Empregadora</label>
+            <div id="detEmpresaNome">-</div>
+          </div>
+          <div class="ss-detail-field">
+            <label>NISS da Entidade Empregadora</label>
+            <div id="detEmpresaNiss">-</div>
+          </div>
+          <div class="ss-detail-field">
+            <label>Data de início do vínculo</label>
+            <div id="detDataInicio">-</div>
+          </div>
+          <div class="ss-detail-field">
+            <label>Data de cessação do vínculo</label>
+            <div id="detDataFim">-</div>
+          </div>
+          <div class="ss-detail-field">
+            <label>Modalidade de contrato</label>
+            <div id="detTipoContrato">-</div>
+          </div>
+          <div class="ss-detail-field" style="grid-column: span 2;">
+            <label>Regime / Enquadramento</label>
+            <div id="detRegime">-</div>
+          </div>
+          <div class="ss-detail-field">
+            <label>Taxa contributiva</label>
+            <div id="detTaxa">-</div>
+          </div>
+          <div class="ss-detail-field">
+            <label>Remuneração base declarada</label>
+            <div id="detRemuneracao">-</div>
+          </div>
+          <div class="ss-detail-field" style="grid-column: span 2;">
+            <label>Profissão / Categoria profissional</label>
+            <div id="detProfissao">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =================================================================== -->
+  <!-- VIEW 4: TELA DE LOGIN SSO (/sso/login)                              -->
+  <!-- =================================================================== -->
+  <main id="viewLogin" style="display: none;">
+    <div class="sso-login-wrapper">
+      <div style="margin-bottom: 28px;">
+        <img id="loginLogoImg" src="/assets/ssd.svg" alt="Segurança Social Direta" style="height: 64px;" />
+      </div>
+
+      <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Serviço de Autenticação da Segurança Social</h1>
+      <p style="color: #555; font-size: 14px;">Autenticação com o seu utilizador da Segurança Social</p>
+
+      <div class="sso-box">
+        <form onsubmit="handleSsoLogin(event)" style="max-width: 420px;">
+          <div class="ss-form-group" style="margin-bottom: 16px;">
+            <label for="loginUsername">Utilizador (NISS da Empresa)</label>
+            <span style="font-size: 12px; color: #666;">Preencha com o seu NISS, e-mail ou subconta</span>
+            <input type="text" id="loginUsername" value="25188187990" required />
+          </div>
+
+          <div class="ss-form-group" style="margin-bottom: 22px;">
+            <label for="loginPassword">Palavra-passe</label>
+            <input type="password" id="loginPassword" value="Tri518818799??" required />
+          </div>
+
+          <div id="loginErrorMsg" style="color: #b42318; font-size: 13px; margin-bottom: 12px; display: none;"></div>
+
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button type="submit" class="ss-btn-dark-pill" style="padding: 11px 32px;">Entrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 1: IMPORTAR PLANILHA DE TRABALHADORES (Excel / CSV / Colar)   -->
+  <!-- =================================================================== -->
+  <div class="ss-modal-backdrop" id="modalImport">
+    <div class="ss-modal">
+      <div class="ss-modal-header">
+        <h3>📤 Subir Tabela de Trabalhadores</h3>
+        <button class="ss-icon-btn" onclick="closeModal('modalImport')">✕</button>
+      </div>
+
+      <p style="font-size: 13.5px; color: #444; margin-top: 0; line-height: 1.5;">
+        Envie um ficheiro <strong>Excel (.xlsx, .xls)</strong> ou <strong>CSV</strong> com as colunas
+        <code>NISS</code>, <code>Nome do trabalhador</code> e <code>Data de nascimento</code> (e opcionalmente <code>NIF</code>, <code>Data de início</code>, <code>Contrato</code>, <code>Remuneração</code>, <code>Profissão</code>), ou cole os dados diretamente abaixo.
+      </p>
+
+      <div class="ss-form-grid">
+        <div class="ss-form-group full">
+          <label>1. Selecionar ficheiro Excel (.xlsx) ou CSV</label>
+          <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv,.txt" />
+        </div>
+
+        <div class="ss-form-group full">
+          <label>OU 2. Colar linhas direto do Excel / Bloco de Notas (NISS ; Nome ; Data de Nascimento)</label>
+          <textarea
+            id="importPasteArea"
+            rows="6"
+            placeholder="Exemplo:&#10;12173121578;ALVARO ENRIQUE ROJAS DE LA OSSA;1993-11-04&#10;12176178503;JOSE DE JESUS MENDOZA PADILLA;1975-08-22"
+          ></textarea>
+        </div>
+
+        <div class="ss-form-group full" style="flex-direction: row; align-items: center; gap: 8px;">
+          <input type="checkbox" id="importReplaceAll" style="width: 16px; height: 16px;" />
+          <label for="importReplaceAll" style="font-weight: 500; cursor: pointer;">
+            Substituir lista atual de trabalhadores desta empresa (limpar anteriores antes de importar)
+          </label>
+        </div>
+      </div>
+
+      <div id="importFeedback" style="margin-top: 12px; font-size: 13.5px; font-weight: 600;"></div>
+
+      <div class="ss-modal-footer">
+        <button class="ss-btn-outline-pill" onclick="closeModal('modalImport')">Cancelar</button>
+        <button class="ss-btn-primary" onclick="submitImportWorkers()">Importar Trabalhadores</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 2: ADICIONAR / EDITAR TRABALHADOR E VÍNCULO                   -->
+  <!-- =================================================================== -->
+  <div class="ss-modal-backdrop" id="modalWorker">
+    <div class="ss-modal">
+      <div class="ss-modal-header">
+        <h3 id="modalWorkerTitle">Comunicar contrato e vínculo do trabalhador</h3>
+        <button class="ss-icon-btn" onclick="closeModal('modalWorker')">✕</button>
+      </div>
+
+      <form onsubmit="saveWorkerForm(event)">
+        <input type="hidden" id="wkId" />
+        <div class="ss-form-grid">
+          <div class="ss-form-group">
+            <label>NISS do Trabalhador *</label>
+            <input type="text" id="wkNiss" required placeholder="Ex: 12173121578" />
+          </div>
+          <div class="ss-form-group">
+            <label>Data de nascimento *</label>
+            <input type="date" id="wkDataNasc" required />
+          </div>
+          <div class="ss-form-group full">
+            <label>Nome completo do trabalhador *</label>
+            <input type="text" id="wkNome" required placeholder="Ex: ALVARO ENRIQUE ROJAS DE LA OSSA" />
+          </div>
+          <div class="ss-form-group">
+            <label>NIF</label>
+            <input type="text" id="wkNif" placeholder="Ex: 314589210" />
+          </div>
+          <div class="ss-form-group">
+            <label>Nacionalidade</label>
+            <input type="text" id="wkNacionalidade" value="Colombiana" />
+          </div>
+          <div class="ss-form-group">
+            <label>Data de início do vínculo</label>
+            <input type="date" id="wkDataInicio" />
+          </div>
+          <div class="ss-form-group">
+            <label>Data de fim / cessação (se aplicável)</label>
+            <input type="date" id="wkDataFim" />
+          </div>
+          <div class="ss-form-group">
+            <label>Tipo de contrato</label>
+            <select id="wkTipoContrato">
+              <option value="Contrato de trabalho a termo certo">Contrato de trabalho a termo certo</option>
+              <option value="Contrato de trabalho por tempo indeterminado">Contrato de trabalho por tempo indeterminado</option>
+              <option value="Contrato de trabalho a termo incerto">Contrato de trabalho a termo incerto</option>
+              <option value="Contrato de trabalho a tempo parcial">Contrato de trabalho a tempo parcial</option>
+            </select>
+          </div>
+          <div class="ss-form-group">
+            <label>Situação do vínculo</label>
+            <select id="wkSituacao">
+              <option value="Ativo">Ativo</option>
+              <option value="Cessado">Cessado</option>
+              <option value="Suspenso">Suspenso</option>
+            </select>
+          </div>
+          <div class="ss-form-group">
+            <label>Remuneração base</label>
+            <input type="text" id="wkRemuneracao" value="870,00 €" />
+          </div>
+          <div class="ss-form-group">
+            <label>Profissão / Categoria</label>
+            <input type="text" id="wkProfissao" value="Trabalhador por Conta de Outrem" />
+          </div>
+        </div>
+
+        <div class="ss-modal-footer">
+          <button type="button" id="btnDeleteWorker" class="ss-btn-outline-pill" style="color: #b42318; border-color: #fda29b; margin-right: auto; display: none;" onclick="deleteCurrentWorker()">
+            🗑️ Excluir vínculo
+          </button>
+          <button type="button" class="ss-btn-outline-pill" onclick="closeModal('modalWorker')">Cancelar</button>
+          <button type="submit" class="ss-btn-primary">Guardar vínculo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 3: PERSONALIZAR EMPRESA E LOGO                                -->
+  <!-- =================================================================== -->
+  <div class="ss-modal-backdrop" id="modalCompany">
+    <div class="ss-modal">
+      <div class="ss-modal-header">
+        <h3>🏢 Personalizar Dados e Logo da Empresa</h3>
+        <button class="ss-icon-btn" onclick="closeModal('modalCompany')">✕</button>
+      </div>
+
+      <form onsubmit="saveCompanyForm(event)">
+        <div class="ss-form-grid">
+          <div class="ss-form-group full">
+            <label>Nome / Razão Social da Empresa *</label>
+            <input type="text" id="empNome" required />
+          </div>
+          <div class="ss-form-group">
+            <label>NISS da Empresa *</label>
+            <input type="text" id="empNiss" required />
+          </div>
+          <div class="ss-form-group">
+            <label>Sigla do Avatar (canto superior direito)</label>
+            <input type="text" id="empSigla" maxlength="3" placeholder="Ex: TL" />
+          </div>
+          <div class="ss-form-group">
+            <label>NIF da Empresa</label>
+            <input type="text" id="empNif" />
+          </div>
+          <div class="ss-form-group">
+            <label>Palavra-passe de Acesso</label>
+            <input type="text" id="empSenha" />
+          </div>
+          <div class="ss-form-group full">
+            <label>Logo do Sistema (Subir imagem da sua empresa ou manter padrão)</label>
+            <div style="display: flex; align-items: center; gap: 14px; margin-top: 4px;">
+              <img id="empLogoPreview" src="/assets/ssd.svg" alt="Preview" style="height: 44px; border: 1px solid #ddd; padding: 4px; border-radius: 6px; background: #fff;" />
+              <input type="file" id="empLogoFile" accept="image/*" onchange="handleLogoUpload(event)" style="flex: 1;" />
+              <button type="button" class="ss-admin-action-btn" onclick="resetDefaultLogo()">Usar Logo Padrão</button>
+            </div>
+            <input type="hidden" id="empLogoUrl" />
+          </div>
+          <div class="ss-form-group">
+            <label>E-mail de Contacto</label>
+            <input type="email" id="empEmail" />
+          </div>
+          <div class="ss-form-group">
+            <label>Conta Bancária (IBAN)</label>
+            <input type="text" id="empIban" />
+          </div>
+        </div>
+
+        <div class="ss-modal-footer">
+          <button type="button" class="ss-btn-outline-pill" onclick="closeModal('modalCompany')">Cancelar</button>
+          <button type="submit" class="ss-btn-primary">Guardar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 4: TROCAR OU CADASTRAR NOVA EMPRESA                           -->
+  <!-- =================================================================== -->
+  <div class="ss-modal-backdrop" id="modalSwitchCompany">
+    <div class="ss-modal">
+      <div class="ss-modal-header">
+        <h3>🔄 Selecionar ou Cadastrar Empresa</h3>
+        <button class="ss-icon-btn" onclick="closeModal('modalSwitchCompany')">✕</button>
+      </div>
+
+      <p style="font-size: 13.5px; color: #555; margin-top: 0;">
+        Selecione qual empresa deseja visualizar no painel ou adicione uma nova empresa ao banco de dados:
+      </p>
+
+      <div id="companiesListContainer" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px;"></div>
+
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+
+      <h4 style="margin: 0 0 12px; font-size: 15px;">➕ Cadastrar Nova Empresa</h4>
+      <form onsubmit="createNewCompany(event)">
+        <div class="ss-form-grid">
+          <div class="ss-form-group full">
+            <label>Razão Social da Nova Empresa *</label>
+            <input type="text" id="newEmpNome" required placeholder="Ex: MASTERCORP PORTUGAL, UNIPESSOAL - LDA" />
+          </div>
+          <div class="ss-form-group">
+            <label>NISS *</label>
+            <input type="text" id="newEmpNiss" required placeholder="Ex: 25199988877" />
+          </div>
+          <div class="ss-form-group">
+            <label>Sigla Avatar (2 letras)</label>
+            <input type="text" id="newEmpSigla" value="MC" maxlength="3" />
+          </div>
+        </div>
+        <div class="ss-modal-footer">
+          <button type="button" class="ss-btn-outline-pill" onclick="closeModal('modalSwitchCompany')">Fechar</button>
+          <button type="submit" class="ss-btn-primary">Criar e Selecionar Empresa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- RODAPÉ OFICIAL -->
+  <footer class="ss-footer">
+    <div class="ss-container">
+      <div class="ss-footer-logos">
+        <div style="display: flex; align-items: center; gap: 24px;">
+          <img id="footerLogoImg" src="/assets/ssd.svg" alt="Segurança Social Direta" />
+          <img src="/assets/seg-soc.svg" alt="Segurança Social" />
+        </div>
+        <div style="display: flex; align-items: center; gap: 24px;">
+          <img src="/assets/prr.svg" alt="PRR" />
+          <img src="/assets/rep-port.svg" alt="República Portuguesa" />
+          <img src="/assets/ue.svg" alt="União Europeia" />
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-top: 24px; font-size: 12.5px; color: #666;">
+        <span>Declaração de Acessibilidade</span>
+        <span>© Instituto de Informática, I.P.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Assistente Flutuante (Canto inferior direito igual ao print) -->
+  <div class="ss-chat-float" id="chatFloatWidget">
+    <div class="ss-chat-bubble">Olá, como posso ajudar?</div>
+    <div class="ss-chat-avatar" onclick="openModal('modalImport')" title="Importar ou Gerir Trabalhadores">
+      <span style="font-size: 20px;">🙂</span>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
