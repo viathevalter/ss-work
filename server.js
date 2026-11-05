@@ -329,13 +329,18 @@ app.delete('/api/trabalhadores/:id', (req, res) => {
 function normalizeDate(val) {
   if (!val && val !== 0) return '1990-01-01';
   if (typeof val === 'number') {
-    const utcDays = Math.floor(val - 25569);
-    const d = new Date(utcDays * 86400 * 1000);
-    if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    const d = XLSX.SSF.parse_date_code(val);
+    if (d && d.y) {
+      return `${String(d.y).padStart(4, '0')}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}`;
+    }
   }
   const str = String(val).trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-  const m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  const m0 = str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  if (m0) {
+    return `${m0[1]}-${m0[2].padStart(2, '0')}-${m0[3].padStart(2, '0')}`;
+  }
+  const m = str.match(/^(\d{1,2})[\/\-\s](\d{1,2})[\/\-\s](\d{4})$/);
   if (m) {
     return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
   }
@@ -386,12 +391,20 @@ app.post('/api/trabalhadores/import', (req, res) => {
       if (!niss || !nome) continue;
 
       const nif = String(getVal(['nif', 'contribuinte', 'cpf']) || '').trim();
-      const nacionalidade = String(getVal(['nacionalidade', 'pais', 'país']) || 'Estrangeira').trim();
-      const dataInicio = normalizeDate(getVal(['data de início', 'data inicio', 'inicio', 'admissao', 'admissão']) || new Date().toISOString().slice(0, 10));
+      const rawNac = String(getVal(['nacionalidade', 'pais', 'país']) || 'Colombiana').trim().toUpperCase();
+      let nacionalidade = 'Colombiana';
+      if (rawNac.includes('PERU')) nacionalidade = 'Peruana';
+      else if (rawNac.includes('COLOMB')) nacionalidade = 'Colombiana';
+      else if (rawNac.includes('ITALI')) nacionalidade = 'Italiana';
+      else if (rawNac.includes('BRASIL')) nacionalidade = 'Brasileira';
+      else if (rawNac.includes('NICARAG')) nacionalidade = 'Nicaraguense';
+      else if (rawNac) nacionalidade = rawNac.charAt(0) + rawNac.slice(1).toLowerCase();
+
+      const dataInicio = normalizeDate(getVal(['data alta segurança', 'data alta', 'data de início', 'data inicio', 'inicio', 'admissao', 'admissão']) || new Date().toISOString().slice(0, 10));
       const tipoContrato = String(getVal(['tipo de contrato', 'contrato', 'vinculo', 'vínculo']) || 'Contrato de trabalho a termo certo').trim();
-      const remuneracao = String(getVal(['remuneração', 'remuneracao', 'salario', 'salário', 'vencimento']) || '870,00 €').trim();
-      const profissao = String(getVal(['profissão', 'profissao', 'cargo', 'categoria', 'funcao', 'função']) || 'Trabalhador por Conta de Outrem').trim();
-      const situacao = String(getVal(['situação', 'situacao', 'estado', 'status']) || 'Ativo').trim();
+      const remuneracao = String(getVal(['remuneração', 'remuneracao', 'salario', 'salário', 'vencimento']) || '920,00 €').trim();
+      const profissao = String(getVal(['profissão', 'profissao', 'categoria']) || 'Operador Especializado').trim();
+      const situacao = 'Ativo';
 
       const existingIdx = store.trabalhadores.findIndex(
         t => Number(t.empresa_id) === Number(empresa_id) && t.niss === niss

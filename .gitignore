@@ -1,5 +1,6 @@
 node_modules/
 data/seguranca_social.db*
 data/ss_work_db.json
+public/dados_importar.xlsx
 .vercel/
 .env
